@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 import '../models/download_task.dart';
 import '../services/api_service.dart';
 
@@ -6,6 +7,7 @@ class DownloadProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
   
   List<DownloadTask> _downloads = [];
+  Timer? _pollTimer;
   bool _isLoading = false;
   String? _error;
 
@@ -33,6 +35,20 @@ class DownloadProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Start polling the downloads endpoint every [intervalSeconds].
+  void startPolling({int intervalSeconds = 2}) {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(Duration(seconds: intervalSeconds), (_) async {
+      await loadDownloads();
+    });
+  }
+
+  /// Stop polling downloads.
+  void stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
   }
 
   /// Démarre un nouveau téléchargement

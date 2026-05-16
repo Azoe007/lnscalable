@@ -17,8 +17,18 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DownloadProvider>().loadDownloads();
+      final provider = context.read<DownloadProvider>();
+      provider.loadDownloads();
+      provider.startPolling(intervalSeconds: 2);
     });
+  }
+
+  @override
+  void dispose() {
+    try {
+      context.read<DownloadProvider>().stopPolling();
+    } catch (_) {}
+    super.dispose();
   }
 
   @override
@@ -191,42 +201,54 @@ class _DownloadCard extends StatelessWidget {
 
             // Progress
             if (!download.isCompleted && !download.isFailed)
-              Column(
+              Row(
                 children: [
-                  LinearProgressIndicator(
-                    value: download.progress / 100,
-                    backgroundColor: AppColors.surfaceLight,
-                    minHeight: 6,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${download.currentChapter}/${download.totalChapters} chapitres',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
+                  // Circular progress
+                  SizedBox(
+                    width: 64,
+                    height: 64,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          value: (download.progress / 100).clamp(0.0, 1.0),
+                          strokeWidth: 6,
+                          backgroundColor: AppColors.surfaceLight,
+                          valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor()),
                         ),
-                      ),
-                      Text(
-                        download.progressText,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                        Text(
+                          download.progress >= 1 ? '${download.progress.toStringAsFixed(0)}%' : '${download.progress.toStringAsFixed(0)}%',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                         ),
-                      ),
-                    ],
-                  ),
-                  if (download.isActive)
-                    Text(
-                      'ETA: ${download.etaText}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textMuted,
-                      ),
+                      ],
                     ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          download.currentChapterTitle ?? 'Chapitre ${download.currentChapter}',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${download.currentChapter}/${download.totalChapters} chapitres • ${download.progressText}',
+                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        ),
+                        const SizedBox(height: 4),
+                        if (download.isActive)
+                          Text(
+                            'ETA: ${download.etaText} • Vitesse: ${download.speed.toStringAsFixed(2)}/s',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
 

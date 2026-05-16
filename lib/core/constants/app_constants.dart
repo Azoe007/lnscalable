@@ -1,6 +1,6 @@
 class AppConstants {
   // API
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'https://lncrwaler-backend.onrender.com';
   static const String apiBaseUrl = '$baseUrl/api';
   
   // Endpoints

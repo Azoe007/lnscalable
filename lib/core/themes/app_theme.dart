@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// Removed GoogleFonts to avoid SDK compatibility issues
 import 'app_colors.dart';
 
 class AppTheme {
@@ -21,9 +21,7 @@ class AppTheme {
       ),
       
       // Text Theme
-      textTheme: GoogleFonts.interTextTheme(
-        brightness: Brightness.dark,
-      ).apply(
+      textTheme: ThemeData.dark().textTheme.apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
       ),
@@ -41,15 +39,7 @@ class AppTheme {
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
       
-      // Card
-      cardTheme: CardTheme(
-        color: AppColors.surface,
-        elevation: 2,
-        shadowColor: AppColors.shadow,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
+      // Card theme: default (removed custom CardTheme for SDK compatibility)
       
       // Elevated Button
       elevatedButtonTheme: ElevatedButtonThemeData(
